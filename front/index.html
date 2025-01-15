@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload de Arquivo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        text-align: center;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 300px;
+      }
+      input[type="file"] {
+        margin-bottom: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .message {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Enviar Arquivo</h2>
+      <form id="fileForm">
+        <input type="file" id="fileInput" name="file" accept=".pdf" required />
+        <br />
+        <button type="submit">Enviar</button>
+      </form>
+      <div class="message" id="message"></div>
+    </div>
+
+    <script>
+      // Função para enviar o arquivo
+      document
+        .getElementById("fileForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const fileInput = document.getElementById("fileInput");
+          const messageDiv = document.getElementById("message");
+
+          const formData = new FormData();
+          formData.append("file", fileInput.files[0]);
+
+          try {
+            messageDiv.textContent = "Enviando arquivo...";
+            messageDiv.style.color = "blue";
+
+            const response = await fetch(
+              "http://localhost:3000/api/forward-file",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (response.ok) {
+              const result = await response.json(); // Espera uma resposta JSON
+              messageDiv.textContent = "Arquivo enviado com sucesso!";
+              messageDiv.style.color = "green";
+            } else {
+              const errorData = await response.json(); // A resposta agora será JSON
+              throw new Error(
+                `Erro na requisição: ${response.status} - ${
+                  errorData.error || "Erro desconhecido"
+                }`
+              );
+            }
+          } catch (error) {
+            messageDiv.textContent = `Falha: ${error.message}`;
+            messageDiv.style.color = "red";
+          }
+        });
+    </script>
+  </body>
+</html>
